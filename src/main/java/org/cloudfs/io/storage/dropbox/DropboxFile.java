@@ -1,73 +1,6 @@
-/**
- * ====
- *     ====
- *         Copyright (c) 2012 Alessandro F. Leite
- *
- *         Permission is hereby granted, free of charge, to any person obtaining
- *         a copy of this software and associated documentation files (the
- *         "Software"), to deal in the Software without restriction, including
- *         without limitation the rights to use, copy, modify, merge, publish,
- *         distribute, sublicense, and/or sell copies of the Software, and to
- *         permit persons to whom the Software is furnished to do so, subject to
- *         the following conditions:
- *
- *         The above copyright notice and this permission notice shall be
- *         included in all copies or substantial portions of the Software.
- *
- *         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- *         EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- *         MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- *         NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- *         LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- *         OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- *         WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *     ====
- *
- *     Copyright (c) 2012 Alessandro F. Leite
- *
- *     Permission is hereby granted, free of charge, to any person obtaining
- *     a copy of this software and associated documentation files (the
- *     "Software"), to deal in the Software without restriction, including
- *     without limitation the rights to use, copy, modify, merge, publish,
- *     distribute, sublicense, and/or sell copies of the Software, and to
- *     permit persons to whom the Software is furnished to do so, subject to
- *     the following conditions:
- *
- *     The above copyright notice and this permission notice shall be
- *     included in all copies or substantial portions of the Software.
- *
- *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- *     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- *     LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- *     OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- *     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * ====
- *
- * Copyright (c) 2012 Alessandro F. Leite
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 package org.cloudfs.io.storage.dropbox;
 
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,6 +8,8 @@ import org.apache.commons.io.IOUtils;
 import org.cloudfs.io.File;
 import org.cloudfs.io.FileEntry;
 import org.cloudfs.io.IOException;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 
 import com.dropbox.client2.DropboxAPI;
@@ -86,6 +21,7 @@ import com.google.common.base.Strings;
 
 public class DropboxFile implements File {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(DropboxFile.class);
 	
 	// ---------------------------------------
 	// -       Dropbox API attributes        -
@@ -129,6 +65,9 @@ public class DropboxFile implements File {
     
 	/** The file's MIME type. */
 	private String _path;
+	
+	/** The file's parent path. */
+	private File _parent;
 	
 	/** The file's entries if this a directory. */
 	private List<FileEntry> entries = new ArrayList<FileEntry>();
@@ -182,8 +121,7 @@ public class DropboxFile implements File {
 
 	@Override
 	public File parent() {
-		// TODO Auto-generated method stub
-		return null;
+		return this._parent;
 	}
 
 	@Override
@@ -215,6 +153,27 @@ public class DropboxFile implements File {
 		} catch (java.io.IOException exception) {
 			throw new IOException(exception.getMessage(), exception);
 		}
+	}
+	
+	@Override
+	public File[] list() {
+		
+		if (!this.isDirectory())
+			return new File[0];
+		
+		List<File> files = new ArrayList<File>();
+		
+		for(FileEntry entry: this.entries){
+			files.add(entry.file());
+		}
+		
+		return files.toArray(new File[files.size()]);
+	}
+
+	@Override
+	public File[] list(FileFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -282,14 +241,22 @@ public class DropboxFile implements File {
 		this._directory = entry.isDir;
 		this._hidden = entry.isDeleted;
 		this._mimeType = entry.mimeType;
-		this._name = entry.fileName();
+		this._name = this._directory ? entry.path : entry.fileName();
 		this._hash = entry.hash;
-		this._modified = RESTUtility.parseDate(entry.modified).getTime();
+		this._parent = new DropboxFile(entry.parentPath(), _api);
+		
+		if (entry.modified != null)
+			this._modified = RESTUtility.parseDate(entry.modified).getTime();
+		
 		this._path = entry.path;
 		
 		if (entry.isDir) {
-			for(Entry newEntry: entry.contents){
-				this.entries.add(new FileEntry(new DropboxFile(newEntry, _api)));
+			if (entry.contents != null) {
+				for (Entry newEntry : entry.contents) {
+					this.entries.add(new FileEntry(new DropboxFile(newEntry, _api)));
+				}
+			} else {
+				LOG.debug("contents of dir name {} was null", this._name);
 			}
 		}
 	}
