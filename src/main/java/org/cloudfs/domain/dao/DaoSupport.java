@@ -89,42 +89,29 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.cloudfs.io.storage.dropbox.test;
+package org.cloudfs.domain.dao;
 
-import static junit.framework.Assert.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
-import org.cloudfs.io.File;
-import org.cloudfs.io.FileEntry;
-import org.cloudfs.io.storage.dropbox.DropboxFS;
-import org.junit.Test;
+public abstract class DaoSupport {
 
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.WebAuthSession;
-
-public class DropboxFileTest  extends DropboxTestSupport{
+	public Long executeUpdate(String sql, Object... args) {
+		return null;
+	}
 	
-    @Test
-    public void account_info() throws DropboxException  {
+	public <T> List<T> execute(String sql, Object[] args, RowMapper<T> mapper) {
+		return null;
+	}
+	
+	public <T> T executeForObject(String sql, RowMapper<T> mapper, Object ... args) {
+		List<T> list = this.execute(sql, args, mapper);
+		return list.isEmpty() ? null : list.get(0);
+	}
+	
 
-        Account info = getApi().accountInfo();
-        assert info.country != null : "No country for account";
-        assert info.displayName != null : "No displayName for account";
-        assert info.quota > 0 : "0 quota in account";
-        assert info.quotaNormal > 0 : "0 normal quota in account";
-        assert info.referralLink != null : "No referral link for account";
-        assert info.uid > 0 : "No uid for account";
-    }
-    
-    @Test
-    public void mount() {
-    	FileEntry entry = new DropboxFS<WebAuthSession>(getApi()).mount();
-    	
-    	assertNotNull(entry);
-    	assertTrue(entry.isDirectory());
-    	
-    	for(File file : entry) {
-    		LOG.info("Name: {}, size: {}, path: {}", new Object[]{file.name(), file.size(), file.absolutePath()});
-    	}
-    }    
+	static public interface RowMapper<T> {
+		public abstract List<T> mapRow(ResultSet rs, int index) throws SQLException;
+	}
 }

@@ -89,42 +89,23 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.cloudfs.io.storage.dropbox.test;
+package org.cloudfs.domain;
 
-import static junit.framework.Assert.*;
+import org.cloudfs.TokenPair;
 
-import org.cloudfs.io.File;
-import org.cloudfs.io.FileEntry;
-import org.cloudfs.io.storage.dropbox.DropboxFS;
-import org.junit.Test;
+/**
+ * <p>
+ * Holds a user's access token and secret.
+ * </p>
+ */
+public class AccessTokenPair extends TokenPair {
 
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.WebAuthSession;
+	/**
+	 * Serial code version <code>serialVersionUID</code>
+	 */
+	private static final long serialVersionUID = 7216256252567948254L;
 
-public class DropboxFileTest  extends DropboxTestSupport{
-	
-    @Test
-    public void account_info() throws DropboxException  {
-
-        Account info = getApi().accountInfo();
-        assert info.country != null : "No country for account";
-        assert info.displayName != null : "No displayName for account";
-        assert info.quota > 0 : "0 quota in account";
-        assert info.quotaNormal > 0 : "0 normal quota in account";
-        assert info.referralLink != null : "No referral link for account";
-        assert info.uid > 0 : "No uid for account";
+	public AccessTokenPair(String key, String secret) {
+        super(key, secret);
     }
-    
-    @Test
-    public void mount() {
-    	FileEntry entry = new DropboxFS<WebAuthSession>(getApi()).mount();
-    	
-    	assertNotNull(entry);
-    	assertTrue(entry.isDirectory());
-    	
-    	for(File file : entry) {
-    		LOG.info("Name: {}, size: {}, path: {}", new Object[]{file.name(), file.size(), file.absolutePath()});
-    	}
-    }    
 }

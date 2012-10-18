@@ -89,42 +89,64 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.cloudfs.io.storage.dropbox.test;
+package org.cloudfs;
 
-import static junit.framework.Assert.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.cloudfs.io.File;
-import org.cloudfs.io.FileEntry;
-import org.cloudfs.io.storage.dropbox.DropboxFS;
-import org.junit.Test;
+import com.google.common.base.Preconditions;
 
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.WebAuthSession;
+public class ParameterList implements Iterable<Parameter> {
 
-public class DropboxFileTest  extends DropboxTestSupport{
+	private List<Parameter> params = new ArrayList<Parameter>();
 	
-    @Test
-    public void account_info() throws DropboxException  {
+	@Override
+	public Iterator<Parameter> iterator() {
+		return list().iterator();
+	}
 
-        Account info = getApi().accountInfo();
-        assert info.country != null : "No country for account";
-        assert info.displayName != null : "No displayName for account";
-        assert info.quota > 0 : "0 quota in account";
-        assert info.quotaNormal > 0 : "0 normal quota in account";
-        assert info.referralLink != null : "No referral link for account";
-        assert info.uid > 0 : "No uid for account";
-    }
-    
-    @Test
-    public void mount() {
-    	FileEntry entry = new DropboxFS<WebAuthSession>(getApi()).mount();
-    	
-    	assertNotNull(entry);
-    	assertTrue(entry.isDirectory());
-    	
-    	for(File file : entry) {
-    		LOG.info("Name: {}, size: {}, path: {}", new Object[]{file.name(), file.size(), file.absolutePath()});
-    	}
-    }    
+	public boolean add(Parameter param) {
+		if (!this.params.contains(Preconditions.checkNotNull(param))) {
+			return this.add(param);
+		}
+		return false;
+	}
+	
+	public Parameter[] array(){
+		return this.params.toArray(new Parameter[this.params.size()]);
+	}
+	
+	public Parameter first(){
+		return this.isEmpty() ? null : this.params.get(0);
+	}
+	
+	public boolean isEmpty(){
+		return this.params.isEmpty();
+	}
+	
+	public Parameter last(){
+		return this.isEmpty() ? null : this.params.get(this.params.size() - 1);
+	}
+	
+	public List<Parameter> list() {
+		return Collections.unmodifiableList(this.params);
+	}
+
+	public boolean remove(Parameter param) {
+		return this.params.remove(param);
+	}
+
+	public boolean replace(Parameter param) {
+		return this.remove(param) & this.add(param);
+	}
+	
+	public int size(){
+		return this.params.size();
+	}
+	
+	public List<Parameter> synchronizedList(){
+		return Collections.synchronizedList(this.list());
+	}
 }

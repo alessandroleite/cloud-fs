@@ -89,42 +89,116 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.cloudfs.io.storage.dropbox.test;
+package org.cloudfs.domain;
 
-import static junit.framework.Assert.*;
+import java.io.Serializable;
+import java.util.Date;
 
-import org.cloudfs.io.File;
-import org.cloudfs.io.FileEntry;
-import org.cloudfs.io.storage.dropbox.DropboxFS;
-import org.junit.Test;
+import com.google.common.base.Preconditions;
 
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.WebAuthSession;
 
-public class DropboxFileTest  extends DropboxTestSupport{
+public class Account implements Serializable {
 	
-    @Test
-    public void account_info() throws DropboxException  {
+	/**
+	 * Serial code version <code>serialVersionUID</code>
+	 */
+	private static final long serialVersionUID = -5164043785654910923L;
 
-        Account info = getApi().accountInfo();
-        assert info.country != null : "No country for account";
-        assert info.displayName != null : "No displayName for account";
-        assert info.quota > 0 : "0 quota in account";
-        assert info.quotaNormal > 0 : "0 normal quota in account";
-        assert info.referralLink != null : "No referral link for account";
-        assert info.uid > 0 : "No uid for account";
-    }
-    
-    @Test
-    public void mount() {
-    	FileEntry entry = new DropboxFS<WebAuthSession>(getApi()).mount();
-    	
-    	assertNotNull(entry);
-    	assertTrue(entry.isDirectory());
-    	
-    	for(File file : entry) {
-    		LOG.info("Name: {}, size: {}, path: {}", new Object[]{file.name(), file.size(), file.absolutePath()});
-    	}
-    }    
+	/** The account's id. */
+	private Long id;
+	
+	/** The user's name. */
+	private String name;
+	
+	/** The user's email. */
+	private String email;
+	
+	/** The account's access token. */
+	private AccessTokenPair accessToken;
+	
+	/** The account's create time. */
+	private Date since;
+
+	public Account(String name, String email, AccessTokenPair token) 
+	{
+		this.name = Preconditions.checkNotNull(name);
+		this.email = email;
+		this.accessToken = Preconditions.checkNotNull(token);
+		this.since = new Date();
+	}
+
+	public Account(long id, String name, String email, AccessTokenPair token) {
+		this(name, email, token);
+		this.id = id;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the accessToken
+	 */
+	public AccessTokenPair getAccessToken() {
+		return accessToken;
+	}
+
+	/**
+	 * @param accessToken the accessToken to set
+	 */
+	public void setAccessToken(AccessTokenPair accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	/**
+	 * @return the since
+	 */
+	public Date getSince() {
+		return since;
+	}
+
+	/**
+	 * @param since the since to set
+	 */
+	public void setSince(Date since) {
+		this.since = since;
+	}
 }

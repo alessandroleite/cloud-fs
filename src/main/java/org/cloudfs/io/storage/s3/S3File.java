@@ -89,42 +89,112 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.cloudfs.io.storage.dropbox.test;
+package org.cloudfs.io.storage.s3;
 
-import static junit.framework.Assert.*;
+import java.io.FileFilter;
 
 import org.cloudfs.io.File;
-import org.cloudfs.io.FileEntry;
-import org.cloudfs.io.storage.dropbox.DropboxFS;
-import org.junit.Test;
+import org.cloudfs.io.IOException;
 
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.WebAuthSession;
-
-public class DropboxFileTest  extends DropboxTestSupport{
+public class S3File implements File{
 	
-    @Test
-    public void account_info() throws DropboxException  {
+	// ---------------------------------------
+	// -        Comparable methods           -
+	// ---------------------------------------
 
-        Account info = getApi().accountInfo();
-        assert info.country != null : "No country for account";
-        assert info.displayName != null : "No displayName for account";
-        assert info.quota > 0 : "0 quota in account";
-        assert info.quotaNormal > 0 : "0 normal quota in account";
-        assert info.referralLink != null : "No referral link for account";
-        assert info.uid > 0 : "No uid for account";
-    }
-    
-    @Test
-    public void mount() {
-    	FileEntry entry = new DropboxFS<WebAuthSession>(getApi()).mount();
-    	
-    	assertNotNull(entry);
-    	assertTrue(entry.isDirectory());
-    	
-    	for(File file : entry) {
-    		LOG.info("Name: {}, size: {}, path: {}", new Object[]{file.name(), file.size(), file.absolutePath()});
-    	}
-    }    
+	@Override
+	public int compareTo(File other) {
+		return this.name().compareTo(other.name());
+	}
+
+	@Override
+	public long size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public File parent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String absolutePath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean createNew() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public File[] list() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public File[] list(FileFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public byte[] data() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean delete() throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean moveTo(File file) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean rename(String name) throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean exists() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isDirectory() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFile() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isHidden() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

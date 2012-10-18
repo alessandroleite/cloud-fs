@@ -206,5 +206,4 @@ public interface File extends Comparable<File> {
 	 *         otherwise.
 	 */
 	boolean isHidden();
-
 }
