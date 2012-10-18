@@ -72,6 +72,10 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
+		<repository>
+			<id>project-local-repo</id>
+			<url>file://${basedir}/maven-repo</url>
+		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -203,7 +207,7 @@
 				<artifactId>maven-license-plugin</artifactId>
 				<version>1.9.0</version>
 				<configuration>
-					<header>src/etc/license.txt</header>
+					<header>license.txt</header>
 				</configuration>
 				<executions>
 					<execution>
